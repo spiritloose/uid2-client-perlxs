@@ -1,0 +1,3 @@
+[submodule "ext/uid2-client-cpp11"]
+	path = ext/uid2-client-cpp11
+	url = https://github.com/IABTechLab/uid2-client-cpp11.git
