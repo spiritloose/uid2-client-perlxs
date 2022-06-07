@@ -46,7 +46,7 @@ make_timestamp(pTHX_ uid2::Timestamp t)
 {
     SV* res = newSV(0);
     sv_setref_pv(res, "UID2::Client::Timestamp", (void *) new uid2::Timestamp(t));
-    return newRV_noinc(res);
+    return res;
 }
 
 MODULE = UID2::Client PACKAGE = UID2::Client
