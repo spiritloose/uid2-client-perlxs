@@ -7,6 +7,10 @@ use Exporter 'import';
 our $VERSION = "0.01";
 
 our @EXPORT_OK = qw(
+    IDENTITY_SCOPE_UID2
+    IDENTITY_SCOPE_EUID
+    IDENTITY_TYPE_EMAIL
+    IDENTITY_TYPE_PHONE
     DECRYPTION_STATUS_SUCCESS
     DECRYPTION_STATUS_NOT_AUTHORIZED_FOR_KEY
     DECRYPTION_STATUS_NOT_INITIALIZED
@@ -15,6 +19,7 @@ our @EXPORT_OK = qw(
     DECRYPTION_STATUS_KEYS_NOT_SYNCED
     DECRYPTION_STATUS_VERSION_NOT_SUPPORTED
     DECRYPTION_STATUS_INVALID_PAYLOAD_TYPE
+    DECRYPTION_STATUS_INVALID_IDENTITY_SCOPE
     ENCRYPTION_STATUS_SUCCESS
     ENCRYPTION_STATUS_NOT_AUTHORIZED_FOR_KEY
     ENCRYPTION_STATUS_NOT_INITIALIZED
@@ -40,11 +45,13 @@ UID2::Client - Unified ID 2.0 Client for Perl (binding to the UID2 C++ library)
 
 =head1 SYNOPSIS
 
-  use UID2::Client;
+  use UID2::Client qw(IDENTITY_SCOPE_UID2);
 
   my $client = UID2::Client->new({
       endpoint => '...',
       auth_key => '...',
+      secret_key => '...',
+      identity_scope => IDENTITY_SCOPE_UID2,
   });
   my $result = $client->refresh();
   die $result->{reason} unless $result->{is_success};
@@ -78,6 +85,14 @@ Please note that not to specify a trailing slash.
 =item auth_key
 
 A bearer token in the request's authorization header.
+
+=item secret_key
+
+A secret key for encrypting/decrypting the request/response body.
+
+=item identity_scope
+
+UID2 or EUID.
 
 =back
 
@@ -177,6 +192,14 @@ Decrypts data encrypted with I<encrypt_data>. Returns a hashref containing the r
 
 =over
 
+=item IDENTITY_SCOPE_UID2
+
+=item IDENTITY_SCOPE_EUID
+
+=item IDENTITY_TYPE_EMAIL
+
+=item IDENTITY_TYPE_PHONE
+
 =item DECRYPTION_STATUS_SUCCESS
 
 =item DECRYPTION_STATUS_NOT_AUTHORIZED_FOR_KEY
@@ -192,6 +215,8 @@ Decrypts data encrypted with I<encrypt_data>. Returns a hashref containing the r
 =item DECRYPTION_STATUS_VERSION_NOT_SUPPORTED
 
 =item DECRYPTION_STATUS_INVALID_PAYLOAD_TYPE
+
+=item DECRYPTION_STATUS_INVALID_IDENTITY_SCOPE
 
 =item ENCRYPTION_STATUS_SUCCESS
 

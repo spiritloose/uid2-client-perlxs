@@ -2,17 +2,23 @@ use strict;
 use warnings;
 
 use Test::More;
-use UID2::Client;
+use UID2::Client qw(IDENTITY_SCOPE_UID2);
 
 my $endpoint   = $ENV{UID2_ENDPOINT};
 my $auth_key   = $ENV{UID2_AUTH_KEY};
+my $secret_key = $ENV{UID2_SECRET_KEY};
 my $uid2_token = $ENV{UID2_TOKEN};
 
-unless ($endpoint && $auth_key && $uid2_token) {
-    plan skip_all => '$ENV{UID2_ENDPOINT} and $ENV{UID2_AUTH_KEY} and $ENV{UID2_TOKEN} are not set';
+unless ($endpoint && $auth_key && $secret_key && $uid2_token) {
+    plan skip_all => '$ENV{UID2_ENDPOINT} and $ENV{UID2_AUTH_KEY} and $ENV{UID2_SECRET_KEY} and $ENV{UID2_TOKEN} are not set';
 }
 
-my $client = UID2::Client->new({ endpoint => $endpoint, auth_key => $auth_key });
+my $client = UID2::Client->new({
+    endpoint => $endpoint,
+    auth_key => $auth_key,
+    secret_key => $secret_key,
+    identity_scope => UID2::Client::IDENTITY_SCOPE_UID2,
+});
 my $result = $client->refresh();
 ok $result->{is_success};
 my $decrypted = $client->decrypt($uid2_token);

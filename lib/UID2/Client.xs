@@ -55,6 +55,16 @@ BOOT:
 {
     HV* stash = gv_stashpv("UID2::Client", 1);
 
+    newCONSTSUB(stash, "IDENTITY_SCOPE_UID2",
+            newSViv(static_cast<int>(uid2::IdentityScope::UID2)));
+    newCONSTSUB(stash, "IDENTITY_SCOPE_EUID",
+            newSViv(static_cast<int>(uid2::IdentityScope::EUID)));
+
+    newCONSTSUB(stash, "IDENTITY_TYPE_EMAIL",
+            newSViv(static_cast<int>(uid2::IdentityType::Email)));
+    newCONSTSUB(stash, "IDENTITY_TYPE_PHONE",
+            newSViv(static_cast<int>(uid2::IdentityType::Phone)));
+
     newCONSTSUB(stash, "DECRYPTION_STATUS_SUCCESS",
             newSViv(static_cast<int>(uid2::DecryptionStatus::SUCCESS)));
     newCONSTSUB(stash, "DECRYPTION_STATUS_NOT_AUTHORIZED_FOR_KEY",
@@ -71,6 +81,8 @@ BOOT:
             newSViv(static_cast<int>(uid2::DecryptionStatus::VERSION_NOT_SUPPORTED)));
     newCONSTSUB(stash, "DECRYPTION_STATUS_INVALID_PAYLOAD_TYPE",
             newSViv(static_cast<int>(uid2::DecryptionStatus::INVALID_PAYLOAD_TYPE)));
+    newCONSTSUB(stash, "DECRYPTION_STATUS_INVALID_IDENTITY_SCOPE",
+            newSViv(static_cast<int>(uid2::DecryptionStatus::INVALID_IDENTITY_SCOPE)));
 
     newCONSTSUB(stash, "ENCRYPTION_STATUS_SUCCESS",
             newSViv(static_cast<int>(uid2::EncryptionStatus::SUCCESS)));
@@ -97,16 +109,26 @@ CODE:
     SV** ent;
     const char* endpoint = nullptr;
     const char* auth_key = nullptr;
+    const char* secret_key = nullptr;
+    uid2::IdentityScope identity_scope = uid2::IdentityScope::UID2;
+    bool identity_scope_given = false;
     if ((ent = hv_fetchs(options, "endpoint", 0)) != NULL) {
         endpoint = SvPV_nolen(*ent);
     }
     if ((ent = hv_fetchs(options, "auth_key", 0)) != NULL) {
         auth_key = SvPV_nolen(*ent);
     }
-    if (endpoint == nullptr || auth_key == nullptr) {
-        croak("endpoint and auth_key are required");
+    if ((ent = hv_fetchs(options, "secret_key", 0)) != NULL) {
+        secret_key = SvPV_nolen(*ent);
     }
-    RETVAL = new uid2::UID2Client(endpoint, auth_key);
+    if ((ent = hv_fetchs(options, "identity_scope", 0)) != NULL) {
+        identity_scope = (uid2::IdentityScope) SvIV(*ent);
+        identity_scope_given = true;
+    }
+    if (endpoint == nullptr || auth_key == nullptr || secret_key == nullptr || !identity_scope_given) {
+        croak("endpoint, auth_key, secret_key and identity_scope are required");
+    }
+    RETVAL = new uid2::UID2Client(endpoint, auth_key, secret_key, identity_scope);
 OUTPUT:
     RETVAL
 
@@ -178,12 +200,10 @@ CODE:
     HV* res = newHV();
     hv_stores(res, "is_success", result.IsSuccess() ? newSViv(1) : newSV(0));
     hv_stores(res, "status", newSViv(static_cast<int>(result.GetStatus())));
-    if (result.IsSuccess()) {
-        std::string uid = result.GetUid();
-        hv_stores(res, "uid", newSVpvn(uid.c_str(), uid.size()));
-        hv_stores(res, "site_id", newSViv(result.GetSiteId()));
-        hv_stores(res, "established", make_timestamp(result.GetEstablished()));
-    }
+    std::string uid = result.GetUid();
+    hv_stores(res, "uid", newSVpvn(uid.c_str(), uid.size()));
+    hv_stores(res, "site_id", newSViv(result.GetSiteId()));
+    hv_stores(res, "established", make_timestamp(result.GetEstablished()));
     RETVAL = newRV_noinc((SV *) res);
 OUTPUT:
     RETVAL

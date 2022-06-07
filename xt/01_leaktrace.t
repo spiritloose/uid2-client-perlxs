@@ -44,13 +44,21 @@ my $site_key = {
     secret    => $site_secret,
 };
 my $example_uid = 'ywsvDNINiZOVSsfkHpLpSJzXzhr6Jx9Z/4Q0+lsEUvM=';
+my $client_secret = 'ioG3wKxAokmp+rERx6A4kM/13qhyolUXIu14WN16Spo=';
 
 no_leaks_ok(sub {
-    my $client = UID2::Client->new({ endpoint => 'ep', auth_key => 'ak' });
+    my $client = UID2::Client->new({
+        endpoint => 'ep',
+        auth_key => 'ak',
+        secret_key => $client_secret,
+        identity_scope => UID2::Client::IDENTITY_SCOPE_UID2,
+    });
     $client->refresh_json(t::TestUtils::key_set_to_json($master_key, $site_key));
-    my $advertising_token = t::TestUtils::encrypt_token(
+    my $advertising_token = t::TestUtils::encrypt_token_v3(
         id_str => $example_uid,
         site_id => $site_id,
+        identity_type => UID2::Client::IDENTITY_TYPE_EMAIL,
+        identity_scope => UID2::Client::IDENTITY_SCOPE_UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $site_key_id, secret => $site_key->{secret} },
     );

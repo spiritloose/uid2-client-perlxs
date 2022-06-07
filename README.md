@@ -5,11 +5,13 @@ UID2::Client - Unified ID 2.0 Client for Perl (binding to the UID2 C++ library)
 
 # SYNOPSIS
 
-    use UID2::Client;
+    use UID2::Client qw(IDENTITY_SCOPE_UID2);
 
     my $client = UID2::Client->new({
         endpoint => '...',
         auth_key => '...',
+        secret_key => '...',
+        identity_scope => IDENTITY_SCOPE_UID2,
     });
     my $result = $client->refresh();
     die $result->{reason} unless $result->{is_success};
@@ -41,6 +43,14 @@ Valid options are:
 - auth\_key
 
     A bearer token in the request's authorization header.
+
+- secret\_key
+
+    A secret key for encrypting/decrypting the request/response body.
+
+- identity\_scope
+
+    UID2 or EUID.
 
 All options are required.
 
@@ -104,6 +114,10 @@ Decrypts data encrypted with _encrypt\_data_. Returns a hashref containing the r
 
 # CONSTANTS
 
+- IDENTITY\_SCOPE\_UID2
+- IDENTITY\_SCOPE\_EUID
+- IDENTITY\_TYPE\_EMAIL
+- IDENTITY\_TYPE\_PHONE
 - DECRYPTION\_STATUS\_SUCCESS
 - DECRYPTION\_STATUS\_NOT\_AUTHORIZED\_FOR\_KEY
 - DECRYPTION\_STATUS\_NOT\_INITIALIZED
@@ -112,6 +126,7 @@ Decrypts data encrypted with _encrypt\_data_. Returns a hashref containing the r
 - DECRYPTION\_STATUS\_KEYS\_NOT\_SYNCED
 - DECRYPTION\_STATUS\_VERSION\_NOT\_SUPPORTED
 - DECRYPTION\_STATUS\_INVALID\_PAYLOAD\_TYPE
+- DECRYPTION\_STATUS\_INVALID\_IDENTITY\_SCOPE
 - ENCRYPTION\_STATUS\_SUCCESS
 - ENCRYPTION\_STATUS\_NOT\_AUTHORIZED\_FOR\_KEY
 - ENCRYPTION\_STATUS\_NOT\_INITIALIZED
