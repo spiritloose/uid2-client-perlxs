@@ -20,7 +20,7 @@ sub new {
         system 'which', 'cmake' and die "Can't detect cmake";
     }
 
-    my $openssl = $self->args('openssl-root-dir');
+    my $openssl = $self->args('with-openssl-root-dir');
     my @extra_compiler_flags = (qw(
         -x c++ --std=c++11 -I.
         -Wall -Wextra -Wno-parentheses
@@ -61,7 +61,7 @@ sub ACTION_build {
     $self->ACTION_ppport_h() unless -e 'ppport.h';
     my $cmake = $self->args('with-cmake') || 'cmake';
     $cmake .= ' -DCMAKE_POSITION_INDEPENDENT_CODE=ON';
-    if (my $openssl = $self->args('openssl-root-dir')) {
+    if (my $openssl = $self->args('with-openssl-root-dir')) {
         $cmake .= " -DOPENSSL_ROOT_DIR=$openssl";
     }
     system <<"END_CMD" and die $!;
