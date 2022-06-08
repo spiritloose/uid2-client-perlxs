@@ -13,8 +13,12 @@ sub new {
     my $self = $class->SUPER::new(%args);
 
     # cmake is required for building uid2-client-cpp11
-    print "Detecting cmake: ";
-    system 'which', 'cmake' and die "Can't detect cmake";
+    if (my $cmake = $self->args('with-cmake')) {
+        print "Using cmake: $cmake\n";
+    } else {
+        print "Detecting cmake: ";
+        system 'which', 'cmake' and die "Can't detect cmake";
+    }
 
     my $openssl = $self->args('openssl-root-dir');
     my @extra_compiler_flags = (qw(
@@ -55,7 +59,8 @@ sub is_debug {
 sub ACTION_build {
     my $self = shift;
     $self->ACTION_ppport_h() unless -e 'ppport.h';
-    my $cmake = 'cmake -DCMAKE_POSITION_INDEPENDENT_CODE=ON';
+    my $cmake = $self->args('with-cmake') || 'cmake';
+    $cmake .= ' -DCMAKE_POSITION_INDEPENDENT_CODE=ON';
     if (my $openssl = $self->args('openssl-root-dir')) {
         $cmake .= " -DOPENSSL_ROOT_DIR=$openssl";
     }
