@@ -128,7 +128,20 @@ CODE:
     if (endpoint == nullptr || auth_key == nullptr || secret_key == nullptr || !identity_scope_given) {
         croak("endpoint, auth_key, secret_key and identity_scope are required");
     }
-    RETVAL = new uid2::UID2Client(endpoint, auth_key, secret_key, identity_scope);
+    uid2::UID2Client* client = nullptr;
+    try {
+        client = new uid2::UID2Client(endpoint, auth_key, secret_key, identity_scope);
+    }
+    catch (std::exception& e) {
+        croak("%s", e.what());
+    }
+    catch (const char * str) {
+        croak("%s", str);
+    }
+    catch (...) {
+        croak("exception occurred during new()");
+    }
+    RETVAL = client;
 OUTPUT:
     RETVAL
 
