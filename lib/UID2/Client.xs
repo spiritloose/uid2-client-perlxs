@@ -53,51 +53,33 @@ MODULE = UID2::Client PACKAGE = UID2::Client
 
 BOOT:
 {
-    HV* stash = gv_stashpv("UID2::Client", 1);
+    HV* stash = gv_stashpv("UID2::Client::IdentityScope", 1);
+    newCONSTSUB(stash, "UID2", newSViv(static_cast<int>(uid2::IdentityScope::UID2)));
+    newCONSTSUB(stash, "EUID", newSViv(static_cast<int>(uid2::IdentityScope::EUID)));
 
-    newCONSTSUB(stash, "IDENTITY_SCOPE_UID2",
-            newSViv(static_cast<int>(uid2::IdentityScope::UID2)));
-    newCONSTSUB(stash, "IDENTITY_SCOPE_EUID",
-            newSViv(static_cast<int>(uid2::IdentityScope::EUID)));
+    stash = gv_stashpv("UID2::Client::IdentityType", 1);
+    newCONSTSUB(stash, "EMAIL", newSViv(static_cast<int>(uid2::IdentityType::Email)));
+    newCONSTSUB(stash, "PHONE", newSViv(static_cast<int>(uid2::IdentityType::Phone)));
 
-    newCONSTSUB(stash, "IDENTITY_TYPE_EMAIL",
-            newSViv(static_cast<int>(uid2::IdentityType::Email)));
-    newCONSTSUB(stash, "IDENTITY_TYPE_PHONE",
-            newSViv(static_cast<int>(uid2::IdentityType::Phone)));
+    stash = gv_stashpv("UID2::Client::DecryptionStatus", 1);
+    newCONSTSUB(stash, "SUCCESS", newSViv(static_cast<int>(uid2::DecryptionStatus::SUCCESS)));
+    newCONSTSUB(stash, "NOT_AUTHORIZED_FOR_KEY", newSViv(static_cast<int>(uid2::DecryptionStatus::NOT_AUTHORIZED_FOR_KEY)));
+    newCONSTSUB(stash, "NOT_INITIALIZED", newSViv(static_cast<int>(uid2::DecryptionStatus::NOT_INITIALIZED)));
+    newCONSTSUB(stash, "INVALID_PAYLOAD", newSViv(static_cast<int>(uid2::DecryptionStatus::INVALID_PAYLOAD)));
+    newCONSTSUB(stash, "EXPIRED_TOKEN", newSViv(static_cast<int>(uid2::DecryptionStatus::EXPIRED_TOKEN)));
+    newCONSTSUB(stash, "KEYS_NOT_SYNCED", newSViv(static_cast<int>(uid2::DecryptionStatus::KEYS_NOT_SYNCED)));
+    newCONSTSUB(stash, "VERSION_NOT_SUPPORTED", newSViv(static_cast<int>(uid2::DecryptionStatus::VERSION_NOT_SUPPORTED)));
+    newCONSTSUB(stash, "INVALID_PAYLOAD_TYPE", newSViv(static_cast<int>(uid2::DecryptionStatus::INVALID_PAYLOAD_TYPE)));
+    newCONSTSUB(stash, "INVALID_IDENTITY_SCOPE", newSViv(static_cast<int>(uid2::DecryptionStatus::INVALID_IDENTITY_SCOPE)));
 
-    newCONSTSUB(stash, "DECRYPTION_STATUS_SUCCESS",
-            newSViv(static_cast<int>(uid2::DecryptionStatus::SUCCESS)));
-    newCONSTSUB(stash, "DECRYPTION_STATUS_NOT_AUTHORIZED_FOR_KEY",
-            newSViv(static_cast<int>(uid2::DecryptionStatus::NOT_AUTHORIZED_FOR_KEY)));
-    newCONSTSUB(stash, "DECRYPTION_STATUS_NOT_INITIALIZED",
-            newSViv(static_cast<int>(uid2::DecryptionStatus::NOT_INITIALIZED)));
-    newCONSTSUB(stash, "DECRYPTION_STATUS_INVALID_PAYLOAD",
-            newSViv(static_cast<int>(uid2::DecryptionStatus::INVALID_PAYLOAD)));
-    newCONSTSUB(stash, "DECRYPTION_STATUS_EXPIRED_TOKEN",
-            newSViv(static_cast<int>(uid2::DecryptionStatus::EXPIRED_TOKEN)));
-    newCONSTSUB(stash, "DECRYPTION_STATUS_KEYS_NOT_SYNCED",
-            newSViv(static_cast<int>(uid2::DecryptionStatus::KEYS_NOT_SYNCED)));
-    newCONSTSUB(stash, "DECRYPTION_STATUS_VERSION_NOT_SUPPORTED",
-            newSViv(static_cast<int>(uid2::DecryptionStatus::VERSION_NOT_SUPPORTED)));
-    newCONSTSUB(stash, "DECRYPTION_STATUS_INVALID_PAYLOAD_TYPE",
-            newSViv(static_cast<int>(uid2::DecryptionStatus::INVALID_PAYLOAD_TYPE)));
-    newCONSTSUB(stash, "DECRYPTION_STATUS_INVALID_IDENTITY_SCOPE",
-            newSViv(static_cast<int>(uid2::DecryptionStatus::INVALID_IDENTITY_SCOPE)));
-
-    newCONSTSUB(stash, "ENCRYPTION_STATUS_SUCCESS",
-            newSViv(static_cast<int>(uid2::EncryptionStatus::SUCCESS)));
-    newCONSTSUB(stash, "ENCRYPTION_STATUS_NOT_AUTHORIZED_FOR_KEY",
-            newSViv(static_cast<int>(uid2::EncryptionStatus::NOT_AUTHORIZED_FOR_KEY)));
-    newCONSTSUB(stash, "ENCRYPTION_STATUS_NOT_INITIALIZED",
-            newSViv(static_cast<int>(uid2::EncryptionStatus::NOT_INITIALIZED)));
-    newCONSTSUB(stash, "ENCRYPTION_STATUS_KEYS_NOT_SYNCED",
-            newSViv(static_cast<int>(uid2::EncryptionStatus::KEYS_NOT_SYNCED)));
-    newCONSTSUB(stash, "ENCRYPTION_STATUS_TOKEN_DECRYPT_FAILURE",
-            newSViv(static_cast<int>(uid2::EncryptionStatus::TOKEN_DECRYPT_FAILURE)));
-    newCONSTSUB(stash, "ENCRYPTION_STATUS_KEY_INACTIVE",
-            newSViv(static_cast<int>(uid2::EncryptionStatus::KEY_INACTIVE)));
-    newCONSTSUB(stash, "ENCRYPTION_STATUS_ENCRYPTION_FAILURE",
-            newSViv(static_cast<int>(uid2::EncryptionStatus::ENCRYPTION_FAILURE)));
+    stash = gv_stashpv("UID2::Client::EncryptionStatus", 1);
+    newCONSTSUB(stash, "SUCCESS", newSViv(static_cast<int>(uid2::EncryptionStatus::SUCCESS)));
+    newCONSTSUB(stash, "NOT_AUTHORIZED_FOR_KEY", newSViv(static_cast<int>(uid2::EncryptionStatus::NOT_AUTHORIZED_FOR_KEY)));
+    newCONSTSUB(stash, "NOT_INITIALIZED", newSViv(static_cast<int>(uid2::EncryptionStatus::NOT_INITIALIZED)));
+    newCONSTSUB(stash, "KEYS_NOT_SYNCED", newSViv(static_cast<int>(uid2::EncryptionStatus::KEYS_NOT_SYNCED)));
+    newCONSTSUB(stash, "TOKEN_DECRYPT_FAILURE", newSViv(static_cast<int>(uid2::EncryptionStatus::TOKEN_DECRYPT_FAILURE)));
+    newCONSTSUB(stash, "KEY_INACTIVE", newSViv(static_cast<int>(uid2::EncryptionStatus::KEY_INACTIVE)));
+    newCONSTSUB(stash, "ENCRYPTION_FAILURE", newSViv(static_cast<int>(uid2::EncryptionStatus::ENCRYPTION_FAILURE)));
 }
 
 PROTOTYPES: DISABLE
@@ -105,13 +87,17 @@ PROTOTYPES: DISABLE
 uid2::UID2Client*
 uid2::UID2Client::new(options)
     HV* options;
+ALIAS:
+    new_euid = 1
 CODE:
     SV** ent;
     const char* endpoint = nullptr;
     const char* auth_key = nullptr;
     const char* secret_key = nullptr;
     uid2::IdentityScope identity_scope = uid2::IdentityScope::UID2;
-    bool identity_scope_given = false;
+    if (ix == 1) {
+         identity_scope = uid2::IdentityScope::EUID;
+    }
     if ((ent = hv_fetchs(options, "endpoint", 0)) != NULL) {
         endpoint = SvPV_nolen(*ent);
     }
@@ -123,10 +109,9 @@ CODE:
     }
     if ((ent = hv_fetchs(options, "identity_scope", 0)) != NULL) {
         identity_scope = (uid2::IdentityScope) SvIV(*ent);
-        identity_scope_given = true;
     }
-    if (endpoint == nullptr || auth_key == nullptr || secret_key == nullptr || !identity_scope_given) {
-        croak("endpoint, auth_key, secret_key and identity_scope are required");
+    if (endpoint == nullptr || auth_key == nullptr || secret_key == nullptr) {
+        croak("endpoint, auth_key, secret_key are required");
     }
     uid2::UID2Client* client = nullptr;
     try {
@@ -216,6 +201,7 @@ CODE:
     std::string uid = result.GetUid();
     hv_stores(res, "uid", newSVpvn(uid.c_str(), uid.size()));
     hv_stores(res, "site_id", newSViv(result.GetSiteId()));
+    hv_stores(res, "site_key_site_id", newSViv(result.GetSiteKeySiteId()));
     hv_stores(res, "established", make_timestamp(result.GetEstablished()));
     RETVAL = newRV_noinc((SV *) res);
 OUTPUT:

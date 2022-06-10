@@ -5,13 +5,12 @@ UID2::Client - Unified ID 2.0 Client for Perl (binding to the UID2 C++ library)
 
 # SYNOPSIS
 
-    use UID2::Client qw(IDENTITY_SCOPE_UID2);
+    use UID2::Client;
 
     my $client = UID2::Client->new({
         endpoint => '...',
         auth_key => '...',
         secret_key => '...',
-        identity_scope => IDENTITY_SCOPE_UID2,
     });
     my $result = $client->refresh();
     die $result->{reason} unless $result->{is_success};
@@ -36,23 +35,27 @@ Valid options are:
 
 - endpoint
 
-    The UID2 Endpoint (eg: https://prod.uidapi.com).
+    The UID2 Endpoint (required).
 
     Please note that not to specify a trailing slash.
 
 - auth\_key
 
-    A bearer token in the request's authorization header.
+    A bearer token in the request's authorization header (required).
 
 - secret\_key
 
-    A secret key for encrypting/decrypting the request/response body.
+    A secret key for encrypting/decrypting the request/response body (required).
 
 - identity\_scope
 
-    UID2 or EUID.
+    UID2 or EUID. Defaults to UID2.
 
-All options are required.
+## new\_euid
+
+    my $client = UID2::Client->new_euid(\%options);
+
+Calls _new()_ with EUID identity\_scope.
 
 # METHODS
 
@@ -63,7 +66,12 @@ All options are required.
 Fetch the latest keys and returns a hashref containing the response. The hashref will have the following keys:
 
 - is\_success
+
+    Boolean indicating whether the operation succeeded.
+
 - reason
+
+    Returns reason for failure if _is\_success_ is false.
 
 ## refresh\_json
 
@@ -74,13 +82,27 @@ Updates keys with the JSON string and returns a hashref containing the response.
 ## decrypt
 
     my $result = $client->decrypt($token);
+    # or
+    my $result = $client->decrypt($token, $timestamp);
 
 Decrypts an advertising token and returns a hashref containing the response. The hashref will have the following keys:
 
 - is\_success
+
+    Boolean indicating whether the operation succeeded.
+
 - status
+
+    Returns failed status if is\_success is false.
+
+    See [UID2::Client::DecryptionStatus](https://metacpan.org/pod/UID2%3A%3AClient%3A%3ADecryptionStatus) for more details.
+
 - uid
+
+    The UID2 string.
+
 - site\_id
+- site\_key\_site\_id
 - established
 
 ## encrypt\_data
@@ -91,49 +113,40 @@ Encrypts arbitrary data with a hashref of requests.
 
 Valid options are:
 
-- site\_id
 - advertising\_token
+
+    Specify the UID2 Token.
+
+- site\_id
+- initialization\_vector
 - now
+
+One of _advertising\_token_ or _site\_id_ must be passed.
 
 Returns a hashref containing the response. The hashref will have the following keys:
 
 - is\_success
+
+    Boolean indicating whether the operation succeeded.
+
 - status
+
+    Returns failed status if is\_success is false.
+
+    See [UID2::Client::EncryptionStatus](https://metacpan.org/pod/UID2%3A%3AClient%3A%3AEncryptionStatus) for more details.
+
 - encrypted\_data
 
 ## decrypt\_data
 
     my $result = $client->decrypt_data($encrypted_data);
 
-Decrypts data encrypted with _encrypt\_data_. Returns a hashref containing the response. The hashref will have the following keys:
+Decrypts data encrypted with _encrypt\_data()_. Returns a hashref containing the response. The hashref will have the following keys:
 
 - is\_success
 - status
 - decrypted\_data
 - encrypted\_at
-
-# CONSTANTS
-
-- IDENTITY\_SCOPE\_UID2
-- IDENTITY\_SCOPE\_EUID
-- IDENTITY\_TYPE\_EMAIL
-- IDENTITY\_TYPE\_PHONE
-- DECRYPTION\_STATUS\_SUCCESS
-- DECRYPTION\_STATUS\_NOT\_AUTHORIZED\_FOR\_KEY
-- DECRYPTION\_STATUS\_NOT\_INITIALIZED
-- DECRYPTION\_STATUS\_INVALID\_PAYLOAD
-- DECRYPTION\_STATUS\_EXPIRED\_TOKEN
-- DECRYPTION\_STATUS\_KEYS\_NOT\_SYNCED
-- DECRYPTION\_STATUS\_VERSION\_NOT\_SUPPORTED
-- DECRYPTION\_STATUS\_INVALID\_PAYLOAD\_TYPE
-- DECRYPTION\_STATUS\_INVALID\_IDENTITY\_SCOPE
-- ENCRYPTION\_STATUS\_SUCCESS
-- ENCRYPTION\_STATUS\_NOT\_AUTHORIZED\_FOR\_KEY
-- ENCRYPTION\_STATUS\_NOT\_INITIALIZED
-- ENCRYPTION\_STATUS\_KEYS\_NOT\_SYNCED
-- ENCRYPTION\_STATUS\_TOKEN\_DECRYPT\_FAILURE
-- ENCRYPTION\_STATUS\_KEY\_INACTIVE
-- ENCRYPTION\_STATUS\_ENCRYPTION\_FAILURE
 
 # SEE ALSO
 

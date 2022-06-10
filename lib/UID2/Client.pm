@@ -6,32 +6,13 @@ use Exporter 'import';
 
 our $VERSION = "0.01";
 
-our @EXPORT_OK = qw(
-    IDENTITY_SCOPE_UID2
-    IDENTITY_SCOPE_EUID
-    IDENTITY_TYPE_EMAIL
-    IDENTITY_TYPE_PHONE
-    DECRYPTION_STATUS_SUCCESS
-    DECRYPTION_STATUS_NOT_AUTHORIZED_FOR_KEY
-    DECRYPTION_STATUS_NOT_INITIALIZED
-    DECRYPTION_STATUS_INVALID_PAYLOAD
-    DECRYPTION_STATUS_EXPIRED_TOKEN
-    DECRYPTION_STATUS_KEYS_NOT_SYNCED
-    DECRYPTION_STATUS_VERSION_NOT_SUPPORTED
-    DECRYPTION_STATUS_INVALID_PAYLOAD_TYPE
-    DECRYPTION_STATUS_INVALID_IDENTITY_SCOPE
-    ENCRYPTION_STATUS_SUCCESS
-    ENCRYPTION_STATUS_NOT_AUTHORIZED_FOR_KEY
-    ENCRYPTION_STATUS_NOT_INITIALIZED
-    ENCRYPTION_STATUS_KEYS_NOT_SYNCED
-    ENCRYPTION_STATUS_TOKEN_DECRYPT_FAILURE
-    ENCRYPTION_STATUS_KEY_INACTIVE
-    ENCRYPTION_STATUS_ENCRYPTION_FAILURE
-);
-
 require XSLoader;
 XSLoader::load('UID2::Client', $VERSION);
 
+require UID2::Client::DecryptionStatus;
+require UID2::Client::EncryptionStatus;
+require UID2::Client::IdentityScope;
+require UID2::Client::IdentityType;
 require UID2::Client::Timestamp;
 
 1;
@@ -45,13 +26,12 @@ UID2::Client - Unified ID 2.0 Client for Perl (binding to the UID2 C++ library)
 
 =head1 SYNOPSIS
 
-  use UID2::Client qw(IDENTITY_SCOPE_UID2);
+  use UID2::Client;
 
   my $client = UID2::Client->new({
       endpoint => '...',
       auth_key => '...',
       secret_key => '...',
-      identity_scope => IDENTITY_SCOPE_UID2,
   });
   my $result = $client->refresh();
   die $result->{reason} unless $result->{is_success};
@@ -78,25 +58,29 @@ Valid options are:
 
 =item endpoint
 
-The UID2 Endpoint (eg: https://prod.uidapi.com).
+The UID2 Endpoint (required).
 
 Please note that not to specify a trailing slash.
 
 =item auth_key
 
-A bearer token in the request's authorization header.
+A bearer token in the request's authorization header (required).
 
 =item secret_key
 
-A secret key for encrypting/decrypting the request/response body.
+A secret key for encrypting/decrypting the request/response body (required).
 
 =item identity_scope
 
-UID2 or EUID.
+UID2 or EUID. Defaults to UID2.
 
 =back
 
-All options are required.
+=head2 new_euid
+
+  my $client = UID2::Client->new_euid(\%options);
+
+Calls I<new()> with EUID identity_scope.
 
 =head1 METHODS
 
@@ -110,7 +94,11 @@ Fetch the latest keys and returns a hashref containing the response. The hashref
 
 =item is_success
 
+Boolean indicating whether the operation succeeded.
+
 =item reason
+
+Returns reason for failure if I<is_success> is false.
 
 =back
 
@@ -123,6 +111,8 @@ Updates keys with the JSON string and returns a hashref containing the response.
 =head2 decrypt
 
   my $result = $client->decrypt($token);
+  # or
+  my $result = $client->decrypt($token, $timestamp);
 
 Decrypts an advertising token and returns a hashref containing the response. The hashref will have the following keys:
 
@@ -130,11 +120,21 @@ Decrypts an advertising token and returns a hashref containing the response. The
 
 =item is_success
 
+Boolean indicating whether the operation succeeded.
+
 =item status
+
+Returns failed status if is_success is false.
+
+See L<UID2::Client::DecryptionStatus> for more details.
 
 =item uid
 
+The UID2 string.
+
 =item site_id
+
+=item site_key_site_id
 
 =item established
 
@@ -150,13 +150,19 @@ Valid options are:
 
 =over
 
+=item advertising_token
+
+Specify the UID2 Token.
+
 =item site_id
 
-=item advertising_token
+=item initialization_vector
 
 =item now
 
 =back
+
+One of I<advertising_token> or I<site_id> must be passed.
 
 Returns a hashref containing the response. The hashref will have the following keys:
 
@@ -164,7 +170,13 @@ Returns a hashref containing the response. The hashref will have the following k
 
 =item is_success
 
+Boolean indicating whether the operation succeeded.
+
 =item status
+
+Returns failed status if is_success is false.
+
+See L<UID2::Client::EncryptionStatus> for more details.
 
 =item encrypted_data
 
@@ -174,7 +186,7 @@ Returns a hashref containing the response. The hashref will have the following k
 
   my $result = $client->decrypt_data($encrypted_data);
 
-Decrypts data encrypted with I<encrypt_data>. Returns a hashref containing the response. The hashref will have the following keys:
+Decrypts data encrypted with I<encrypt_data()>. Returns a hashref containing the response. The hashref will have the following keys:
 
 =over
 
@@ -185,52 +197,6 @@ Decrypts data encrypted with I<encrypt_data>. Returns a hashref containing the r
 =item decrypted_data
 
 =item encrypted_at
-
-=back
-
-=head1 CONSTANTS
-
-=over
-
-=item IDENTITY_SCOPE_UID2
-
-=item IDENTITY_SCOPE_EUID
-
-=item IDENTITY_TYPE_EMAIL
-
-=item IDENTITY_TYPE_PHONE
-
-=item DECRYPTION_STATUS_SUCCESS
-
-=item DECRYPTION_STATUS_NOT_AUTHORIZED_FOR_KEY
-
-=item DECRYPTION_STATUS_NOT_INITIALIZED
-
-=item DECRYPTION_STATUS_INVALID_PAYLOAD
-
-=item DECRYPTION_STATUS_EXPIRED_TOKEN
-
-=item DECRYPTION_STATUS_KEYS_NOT_SYNCED
-
-=item DECRYPTION_STATUS_VERSION_NOT_SUPPORTED
-
-=item DECRYPTION_STATUS_INVALID_PAYLOAD_TYPE
-
-=item DECRYPTION_STATUS_INVALID_IDENTITY_SCOPE
-
-=item ENCRYPTION_STATUS_SUCCESS
-
-=item ENCRYPTION_STATUS_NOT_AUTHORIZED_FOR_KEY
-
-=item ENCRYPTION_STATUS_NOT_INITIALIZED
-
-=item ENCRYPTION_STATUS_KEYS_NOT_SYNCED
-
-=item ENCRYPTION_STATUS_TOKEN_DECRYPT_FAILURE
-
-=item ENCRYPTION_STATUS_KEY_INACTIVE
-
-=item ENCRYPTION_STATUS_ENCRYPTION_FAILURE
 
 =back
 

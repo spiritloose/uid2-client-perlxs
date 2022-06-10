@@ -2,7 +2,8 @@ use strict;
 use warnings;
 
 use Test::More;
-use UID2::Client qw(IDENTITY_SCOPE_UID2);
+
+use UID2::Client;
 
 my $endpoint   = $ENV{UID2_ENDPOINT};
 my $auth_key   = $ENV{UID2_AUTH_KEY};
@@ -17,7 +18,6 @@ my $client = UID2::Client->new({
     endpoint => $endpoint,
     auth_key => $auth_key,
     secret_key => $secret_key,
-    identity_scope => UID2::Client::IDENTITY_SCOPE_UID2,
 });
 my $result = $client->refresh();
 ok $result->{is_success};

@@ -51,14 +51,14 @@ no_leaks_ok(sub {
         endpoint => 'ep',
         auth_key => 'ak',
         secret_key => $client_secret,
-        identity_scope => UID2::Client::IDENTITY_SCOPE_UID2,
+        identity_scope => UID2::Client::IdentityScope::UID2,
     });
     $client->refresh_json(t::TestUtils::key_set_to_json($master_key, $site_key));
     my $advertising_token = t::TestUtils::encrypt_token_v3(
         id_str => $example_uid,
         site_id => $site_id,
-        identity_type => UID2::Client::IDENTITY_TYPE_EMAIL,
-        identity_scope => UID2::Client::IDENTITY_SCOPE_UID2,
+        identity_type => UID2::Client::IdentityType::EMAIL,
+        identity_scope => UID2::Client::IdentityScope::UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $site_key_id, secret => $site_key->{secret} },
     );

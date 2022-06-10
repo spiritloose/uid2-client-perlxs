@@ -4,13 +4,20 @@ use lib '.';
 
 use Test::More;
 use Crypt::Misc qw(encode_b64 decode_b64);
+
 use UID2::Client;
+use UID2::Client::DecryptionStatus;
+use UID2::Client::EncryptionStatus;
+use UID2::Client::IdentityScope;
+use UID2::Client::IdentityType;
+use UID2::Client::Timestamp;
 
 use t::TestUtils;
 
 my $master_key_id = 164;
 my $site_key_id = 165;
 my $site_id = 9000;
+my $site_id2 = 2;
 my $master_secret = pack('C32',
     139, 37, 241, 173, 18, 92, 36, 232,
     165, 168, 23, 18, 38, 195, 123, 92,
@@ -41,12 +48,12 @@ my $site_key = {
     secret    => $site_secret,
 };
 my $example_uid = 'ywsvDNINiZOVSsfkHpLpSJzXzhr6Jx9Z/4Q0+lsEUvM=';
-my $client_secret = 'ioG3wKxAokmp+rERx6A4kM/13qhyolUXIu14WN16Spo=';
+my $secret_key = 'ioG3wKxAokmp+rERx6A4kM/13qhyolUXIu14WN16Spo=';
 my $client_options = {
     endpoint => 'ep',
     auth_key => 'ak',
-    secret_key => $client_secret,
-    identity_scope => UID2::Client::IDENTITY_SCOPE_UID2,
+    secret_key => $secret_key,
+    identity_scope => UID2::Client::IdentityScope::UID2,
 };
 
 subtest SmokeTest => sub {
@@ -58,14 +65,14 @@ subtest SmokeTest => sub {
     my $advertising_token = t::TestUtils::encrypt_token_v3(
         id_str => $example_uid,
         site_id => $site_id,
-        identity_type => UID2::Client::IDENTITY_TYPE_EMAIL,
-        identity_scope => UID2::Client::IDENTITY_SCOPE_UID2,
+        identity_type => UID2::Client::IdentityType::EMAIL,
+        identity_scope => UID2::Client::IdentityScope::UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $site_key_id, secret => $site_key->{secret} },
     );
     my $result = $client->decrypt($advertising_token);
     ok $result->{is_success};
-    is $result->{status}, UID2::Client::DECRYPTION_STATUS_SUCCESS();
+    is $result->{status}, UID2::Client::DecryptionStatus::SUCCESS();
     is $result->{uid}, $example_uid;
 };
 
@@ -74,14 +81,14 @@ subtest EmptyKeyContainer => sub {
     my $advertising_token = t::TestUtils::encrypt_token_v3(
         id_str => $example_uid,
         site_id => $site_id,
-        identity_type => UID2::Client::IDENTITY_TYPE_EMAIL,
-        identity_scope => UID2::Client::IDENTITY_SCOPE_UID2,
+        identity_type => UID2::Client::IdentityType::EMAIL,
+        identity_scope => UID2::Client::IdentityScope::UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $site_key_id, secret => $site_key->{secret} },
     );
     my $result = $client->decrypt($advertising_token);
     ok !$result->{is_success};
-    is $result->{status}, UID2::Client::DECRYPTION_STATUS_NOT_INITIALIZED();
+    is $result->{status}, UID2::Client::DecryptionStatus::NOT_INITIALIZED();
 };
 
 subtest NotAuthorizedForKey => sub {
@@ -89,8 +96,8 @@ subtest NotAuthorizedForKey => sub {
     my $advertising_token = t::TestUtils::encrypt_token_v3(
         id_str => $example_uid,
         site_id => $site_id,
-        identity_type => UID2::Client::IDENTITY_TYPE_EMAIL,
-        identity_scope => UID2::Client::IDENTITY_SCOPE_UID2,
+        identity_type => UID2::Client::IdentityType::EMAIL,
+        identity_scope => UID2::Client::IdentityScope::UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $site_key_id, secret => $site_key->{secret} },
     );
@@ -113,7 +120,7 @@ subtest NotAuthorizedForKey => sub {
     $client->refresh_json(t::TestUtils::key_set_to_json($another_master_key, $another_site_key));
     my $res = $client->decrypt($advertising_token, UID2::Client::Timestamp->now());
     ok !$res->{is_success};
-    is $res->{status}, UID2::Client::DECRYPTION_STATUS_KEYS_NOT_SYNCED();
+    is $res->{status}, UID2::Client::DecryptionStatus::KEYS_NOT_SYNCED();
 };
 
 subtest InvalidPayload => sub {
@@ -121,18 +128,18 @@ subtest InvalidPayload => sub {
     my $advertising_token = t::TestUtils::encrypt_token_v3(
         id_str => $example_uid,
         site_id => $site_id,
-        identity_type => UID2::Client::IDENTITY_TYPE_EMAIL,
-        identity_scope => UID2::Client::IDENTITY_SCOPE_UID2,
+        identity_type => UID2::Client::IdentityType::EMAIL,
+        identity_scope => UID2::Client::IdentityScope::UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $site_key_id, secret => $site_key->{secret} },
     );
     $client->refresh_json(t::TestUtils::key_set_to_json($master_key, $site_key));
     is $client->decrypt(substr($advertising_token, 0, length($advertising_token) -1), $now)->{status},
-            UID2::Client::DECRYPTION_STATUS_INVALID_PAYLOAD;
+            UID2::Client::DecryptionStatus::INVALID_PAYLOAD;
     is $client->decrypt(substr($advertising_token, 0, length($advertising_token) -4), $now)->{status},
-            UID2::Client::DECRYPTION_STATUS_INVALID_PAYLOAD;
+            UID2::Client::DecryptionStatus::INVALID_PAYLOAD;
     is $client->decrypt(substr($advertising_token, 0, 4), $now)->{status},
-            UID2::Client::DECRYPTION_STATUS_INVALID_PAYLOAD;
+            UID2::Client::DecryptionStatus::INVALID_PAYLOAD;
 };
 
 subtest TokenExpiryAndCustomNow => sub {
@@ -142,15 +149,15 @@ subtest TokenExpiryAndCustomNow => sub {
     my $advertising_token = t::TestUtils::encrypt_token_v3(
         id_str => $example_uid,
         site_id => $site_id,
-        identity_type => UID2::Client::IDENTITY_TYPE_EMAIL,
-        identity_scope => UID2::Client::IDENTITY_SCOPE_UID2,
+        identity_type => UID2::Client::IdentityType::EMAIL,
+        identity_scope => UID2::Client::IdentityScope::UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $site_key_id, secret => $site_key->{secret} },
         token_expiry => $expiry,
     );
     my $result = $client->decrypt($advertising_token, $expiry->add_seconds(1));
     ok !$result->{is_success};
-    is $result->{status}, UID2::Client::DECRYPTION_STATUS_EXPIRED_TOKEN();
+    is $result->{status}, UID2::Client::DecryptionStatus::EXPIRED_TOKEN();
 
     $result = $client->decrypt($advertising_token, $expiry->add_seconds(-1));
     ok $result->{is_success};
@@ -163,10 +170,10 @@ subtest SpecificSiteId => sub {
     $client->refresh_json(t::TestUtils::key_set_to_json($site_key));
     my $encrypted = $client->encrypt_data($data, { site_id => $site_id });
     ok $encrypted->{is_success};
-    is $encrypted->{status}, UID2::Client::ENCRYPTION_STATUS_SUCCESS();
+    is $encrypted->{status}, UID2::Client::EncryptionStatus::SUCCESS();
     my $decrypted = $client->decrypt_data($encrypted->{encrypted_data});
     ok $decrypted->{is_success};
-    is $decrypted->{status}, UID2::Client::DECRYPTION_STATUS_SUCCESS();
+    is $decrypted->{status}, UID2::Client::DecryptionStatus::SUCCESS();
     is $decrypted->{decrypted_data}, $data;
 };
 
@@ -177,18 +184,40 @@ subtest SiteIdFromToken => sub {
     my $advertising_token = t::TestUtils::encrypt_token_v3(
         id_str => $example_uid,
         site_id => $site_id,
-        identity_type => UID2::Client::IDENTITY_TYPE_EMAIL,
-        identity_scope => UID2::Client::IDENTITY_SCOPE_UID2,
+        identity_type => UID2::Client::IdentityType::EMAIL,
+        identity_scope => UID2::Client::IdentityScope::UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $site_key_id, secret => $site_key->{secret} },
     );
     my $encrypted = $client->encrypt_data($data, { advertising_token => $advertising_token });
     ok $encrypted->{is_success};
-    is $encrypted->{status}, UID2::Client::ENCRYPTION_STATUS_SUCCESS();
+    is $encrypted->{status}, UID2::Client::EncryptionStatus::SUCCESS();
     $client->refresh_json(t::TestUtils::key_set_to_json($site_key));
     my $decrypted = $client->decrypt_data($encrypted->{encrypted_data});
     ok $decrypted->{is_success};
-    is $decrypted->{status}, UID2::Client::DECRYPTION_STATUS_SUCCESS();
+    is $decrypted->{status}, UID2::Client::DecryptionStatus::SUCCESS();
+    is $decrypted->{decrypted_data}, $data;
+};
+
+subtest SiteIdFromTokenCustomSiteKeySiteId => sub {
+    my $data = pack('C*', 1, 2, 3, 4, 5, 6);
+    my $client = UID2::Client->new($client_options);
+    $client->refresh_json(t::TestUtils::key_set_to_json($master_key, $site_key));
+    my $advertising_token = t::TestUtils::encrypt_token_v3(
+        id_str => $example_uid,
+        site_id => $site_id2,
+        identity_type => UID2::Client::IdentityType::EMAIL,
+        identity_scope => UID2::Client::IdentityScope::UID2,
+        master_key => { id => $master_key_id, secret => $master_key->{secret} },
+        site_key => { id => $site_key_id, secret => $site_key->{secret} },
+    );
+    my $encrypted = $client->encrypt_data($data, { advertising_token => $advertising_token });
+    ok $encrypted->{is_success};
+    is $encrypted->{status}, UID2::Client::EncryptionStatus::SUCCESS();
+    $client->refresh_json(t::TestUtils::key_set_to_json($site_key));
+    my $decrypted = $client->decrypt_data($encrypted->{encrypted_data});
+    ok $decrypted->{is_success};
+    is $decrypted->{status}, UID2::Client::DecryptionStatus::SUCCESS();
     is $decrypted->{decrypted_data}, $data;
 };
 
@@ -199,8 +228,8 @@ subtest SiteIdAndTokenSet => sub {
     my $advertising_token = t::TestUtils::encrypt_token_v3(
         id_str => $example_uid,
         site_id => $site_id,
-        identity_type => UID2::Client::IDENTITY_TYPE_EMAIL,
-        identity_scope => UID2::Client::IDENTITY_SCOPE_UID2,
+        identity_type => UID2::Client::IdentityType::EMAIL,
+        identity_scope => UID2::Client::IdentityScope::UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $site_key_id, secret => $site_key->{secret} },
     );
@@ -233,10 +262,10 @@ subtest MultipleSiteKeys => sub {
         local $Test::Builder::Level = $Test::Builder::Level + 1;
         $client->refresh_json(t::TestUtils::key_set_to_json(@keys));
         my $encrypted = $client->encrypt_data($data, { site_id => $site_id, now => $now });
-        is $encrypted->{status}, UID2::Client::ENCRYPTION_STATUS_SUCCESS;
+        is $encrypted->{status}, UID2::Client::EncryptionStatus::SUCCESS;
         $client->refresh_json(t::TestUtils::key_set_to_json($key));
         my $decrypted = $client->decrypt_data($encrypted->{encrypted_data});
-        is $decrypted->{status}, UID2::Client::DECRYPTION_STATUS_SUCCESS;
+        is $decrypted->{status}, UID2::Client::DecryptionStatus::SUCCESS;
         is $decrypted->{decrypted_data}, $data;
     };
     &$test($now->add_days(-5), $keys[5]);
@@ -256,16 +285,42 @@ subtest TokenDecryptFailed => sub {
     $client->refresh_json(t::TestUtils::key_set_to_json($master_key, $site_key));
     my $encrypted = $client->encrypt_data($data, { advertising_token => 'bogus-token' });
     ok !$encrypted->{is_success};
-    is $encrypted->{status}, UID2::Client::ENCRYPTION_STATUS_TOKEN_DECRYPT_FAILURE;
+    is $encrypted->{status}, UID2::Client::EncryptionStatus::TOKEN_DECRYPT_FAILURE;
+};
+
+
+subtest TokenDecryptKeyExpired => sub {
+    my $data = pack('C*', 1, 2, 3, 4, 5, 6);
+    my $client = UID2::Client->new($client_options);
+    my $key = {
+        id        => $site_key_id,
+        site_id   => $site_id2,
+        created   => $now,
+        activates => $now->add_days(-2),
+        expires   => $now->add_days(-1),
+        secret    => $site_secret,
+    };
+    $client->refresh_json(t::TestUtils::key_set_to_json($master_key, $key));
+    my $advertising_token = t::TestUtils::encrypt_token_v3(
+        id_str => $example_uid,
+        site_id => $site_id,
+        identity_type => UID2::Client::IdentityType::EMAIL,
+        identity_scope => UID2::Client::IdentityScope::UID2,
+        master_key => { id => $master_key_id, secret => $master_key->{secret} },
+        site_key => { id => $key->{id}, secret => $key->{secret} },
+    );
+    my $encrypted = $client->encrypt_data($data, { advertising_token => $advertising_token });
+    ok !$encrypted->{is_success};
+    is $encrypted->{status}, UID2::Client::EncryptionStatus::NOT_AUTHORIZED_FOR_KEY;
 };
 
 subtest NoSiteKey => sub {
     my $data = pack('C*', 1, 2, 3, 4, 5, 6);
     my $client = UID2::Client->new($client_options);
     $client->refresh_json(t::TestUtils::key_set_to_json($master_key, $site_key));
-    my $encrypted = $client->encrypt_data($data, { site_id => $site_id + 1 });
+    my $encrypted = $client->encrypt_data($data, { site_id => $site_id2 });
     ok !$encrypted->{is_success};
-    is $encrypted->{status}, UID2::Client::ENCRYPTION_STATUS_NOT_AUTHORIZED_FOR_KEY;
+    is $encrypted->{status}, UID2::Client::EncryptionStatus::NOT_AUTHORIZED_FOR_KEY;
 };
 
 subtest SiteKeyExpired => sub {
@@ -275,7 +330,7 @@ subtest SiteKeyExpired => sub {
     $client->refresh_json(t::TestUtils::key_set_to_json($master_key, $key));
     my $encrypted = $client->encrypt_data($data, { site_id => $site_id });
     ok !$encrypted->{is_success};
-    is $encrypted->{status}, UID2::Client::ENCRYPTION_STATUS_NOT_AUTHORIZED_FOR_KEY;
+    is $encrypted->{status}, UID2::Client::EncryptionStatus::NOT_AUTHORIZED_FOR_KEY;
 };
 
 subtest SiteKeyInactive => sub {
@@ -285,7 +340,7 @@ subtest SiteKeyInactive => sub {
     $client->refresh_json(t::TestUtils::key_set_to_json($master_key, $key));
     my $encrypted = $client->encrypt_data($data, { site_id => $site_id });
     ok !$encrypted->{is_success};
-    is $encrypted->{status}, UID2::Client::ENCRYPTION_STATUS_NOT_AUTHORIZED_FOR_KEY;
+    is $encrypted->{status}, UID2::Client::EncryptionStatus::NOT_AUTHORIZED_FOR_KEY;
 };
 
 subtest SiteKeyInactiveCustomNow => sub {
@@ -297,7 +352,7 @@ subtest SiteKeyInactiveCustomNow => sub {
         now => $site_key->{activates}->add_seconds(-1),
     });
     ok !$encrypted->{is_success};
-    is $encrypted->{status}, UID2::Client::ENCRYPTION_STATUS_NOT_AUTHORIZED_FOR_KEY;
+    is $encrypted->{status}, UID2::Client::EncryptionStatus::NOT_AUTHORIZED_FOR_KEY;
 };
 
 subtest TokenExpired => sub {
@@ -309,23 +364,23 @@ subtest TokenExpired => sub {
     my $advertising_token = t::TestUtils::encrypt_token_v3(
         id_str => $example_uid,
         site_id => $site_id,
-        identity_type => UID2::Client::IDENTITY_TYPE_EMAIL,
-        identity_scope => UID2::Client::IDENTITY_SCOPE_UID2,
+        identity_type => UID2::Client::IdentityType::EMAIL,
+        identity_scope => UID2::Client::IdentityScope::UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $site_key_id, secret => $site_key->{secret} },
         %params,
     );
     my $encrypted = $client->encrypt_data($data, { advertising_token => $advertising_token });
     ok !$encrypted->{is_success};
-    is $encrypted->{status}, UID2::Client::ENCRYPTION_STATUS_TOKEN_DECRYPT_FAILURE;
+    is $encrypted->{status}, UID2::Client::EncryptionStatus::TOKEN_DECRYPT_FAILURE;
 
     my $now = $expiry->add_seconds(-1);
     $encrypted = $client->encrypt_data($data, { advertising_token => $advertising_token, now => $now });
     ok $encrypted->{is_success};
-    is $encrypted->{status}, UID2::Client::ENCRYPTION_STATUS_SUCCESS;
+    is $encrypted->{status}, UID2::Client::EncryptionStatus::SUCCESS;
     my $decrypted = $client->decrypt_data($encrypted->{encrypted_data});
     ok $decrypted->{is_success};
-    is $decrypted->{status}, UID2::Client::DECRYPTION_STATUS_SUCCESS;
+    is $decrypted->{status}, UID2::Client::DecryptionStatus::SUCCESS;
     is $decrypted->{decrypted_data}, $data;
 };
 
@@ -334,11 +389,11 @@ subtest BadPayloadType => sub {
     my $client = UID2::Client->new($client_options);
     $client->refresh_json(t::TestUtils::key_set_to_json($site_key));
     my $encrypted = $client->encrypt_data($data, { site_id => $site_id });
-    is $encrypted->{status}, UID2::Client::ENCRYPTION_STATUS_SUCCESS;
+    is $encrypted->{status}, UID2::Client::EncryptionStatus::SUCCESS;
     my $encrypted_bytes = decode_b64($encrypted->{encrypted_data});
     substr($encrypted_bytes, 0, 1) = 0;
     my $decrypted = $client->decrypt_data(encode_b64($encrypted_bytes));
-    is $decrypted->{status}, UID2::Client::DECRYPTION_STATUS_INVALID_PAYLOAD_TYPE;
+    is $decrypted->{status}, UID2::Client::DecryptionStatus::INVALID_PAYLOAD_TYPE;
 };
 
 subtest BadVersion => sub {
@@ -346,11 +401,11 @@ subtest BadVersion => sub {
     my $client = UID2::Client->new($client_options);
     $client->refresh_json(t::TestUtils::key_set_to_json($site_key));
     my $encrypted = $client->encrypt_data($data, { site_id => $site_id });
-    is $encrypted->{status}, UID2::Client::ENCRYPTION_STATUS_SUCCESS;
+    is $encrypted->{status}, UID2::Client::EncryptionStatus::SUCCESS;
     my $encrypted_bytes = decode_b64($encrypted->{encrypted_data});
     substr($encrypted_bytes, 1, 1) = 0;
     my $decrypted = $client->decrypt_data(encode_b64($encrypted_bytes));
-    is $decrypted->{status}, UID2::Client::DECRYPTION_STATUS_VERSION_NOT_SUPPORTED;
+    is $decrypted->{status}, UID2::Client::DecryptionStatus::VERSION_NOT_SUPPORTED;
 };
 
 subtest BadPayload => sub {
@@ -358,23 +413,23 @@ subtest BadPayload => sub {
     my $client = UID2::Client->new($client_options);
     $client->refresh_json(t::TestUtils::key_set_to_json($site_key));
     my $encrypted = $client->encrypt_data($data, { site_id => $site_id });
-    is $encrypted->{status}, UID2::Client::ENCRYPTION_STATUS_SUCCESS;
+    is $encrypted->{status}, UID2::Client::EncryptionStatus::SUCCESS;
     my $encrypted_bytes = decode_b64($encrypted->{encrypted_data});
     my $encrypted_bytes_larger = $encrypted_bytes;
     $encrypted_bytes_larger .= '1';
     my $decrypted = $client->decrypt_data(encode_b64($encrypted_bytes_larger));
-    is $decrypted->{status}, UID2::Client::DECRYPTION_STATUS_INVALID_PAYLOAD;
+    is $decrypted->{status}, UID2::Client::DecryptionStatus::INVALID_PAYLOAD;
 
     my $encrypted_bytes_smaller = $encrypted_bytes;
     $encrypted_bytes_smaller =~ s/.\z//;
     $decrypted = $client->decrypt_data(encode_b64($encrypted_bytes_smaller));
-    is $decrypted->{status}, UID2::Client::DECRYPTION_STATUS_INVALID_PAYLOAD;
+    is $decrypted->{status}, UID2::Client::DecryptionStatus::INVALID_PAYLOAD;
 
     $decrypted = $client->decrypt_data(substr($encrypted_bytes, 0, 4));
-    is $decrypted->{status}, UID2::Client::DECRYPTION_STATUS_INVALID_PAYLOAD;
+    is $decrypted->{status}, UID2::Client::DecryptionStatus::INVALID_PAYLOAD;
 
     $decrypted = $client->decrypt_data($encrypted_bytes . '0');
-    is $decrypted->{status}, UID2::Client::DECRYPTION_STATUS_INVALID_PAYLOAD;
+    is $decrypted->{status}, UID2::Client::DecryptionStatus::INVALID_PAYLOAD;
 };
 
 subtest NoDecryptionKey => sub {
@@ -382,10 +437,10 @@ subtest NoDecryptionKey => sub {
     my $client = UID2::Client->new($client_options);
     $client->refresh_json(t::TestUtils::key_set_to_json($site_key));
     my $encrypted = $client->encrypt_data($data, { site_id => $site_id });
-    is $encrypted->{status}, UID2::Client::ENCRYPTION_STATUS_SUCCESS;
+    is $encrypted->{status}, UID2::Client::EncryptionStatus::SUCCESS;
     $client->refresh_json(t::TestUtils::key_set_to_json($master_key));
     my $decrypted = $client->decrypt_data($encrypted->{encrypted_data});
-    is $decrypted->{status}, UID2::Client::DECRYPTION_STATUS_NOT_AUTHORIZED_FOR_KEY
+    is $decrypted->{status}, UID2::Client::DecryptionStatus::NOT_AUTHORIZED_FOR_KEY
 };
 
 done_testing;

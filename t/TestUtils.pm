@@ -6,20 +6,21 @@ use Crypt::Mode::CBC;
 use Crypt::AuthEnc::GCM;
 use Crypt::Misc qw(encode_b64 decode_b64);
 use Crypt::PRNG qw(random_bytes irand);
-use Time::HiRes qw(gettimeofday);
 use JSON::PP;
+
+use UID2::Client;
+use UID2::Client::Timestamp;
 
 sub encrypt_token_v2 {
     my %args = @_;
     my $privacy_bit = irand();
-    my $established_ms = int((gettimeofday() - (60 * 60)) * 1000);
+    my $established = UID2::Client::Timestamp->now->add_seconds(-60 * 60);
     my $identity = pack 'N! N! a* N! q>',
-            $args{site_id}, length($args{id_str}), $args{id_str}, $privacy_bit, $established_ms;
+            $args{site_id}, length($args{id_str}), $args{id_str}, $privacy_bit, $established->get_epoch_milli;
     my $identity_iv = random_bytes(16);
 
-    my $expires_ms = $args{token_expiry} ? $args{token_expiry}->get_epoch_milli
-            : int((gettimeofday() + (60 * 60)) * 1000);
-    my $master_payload = pack 'q> a*', $expires_ms, _encrypt_cbc($identity, $args{site_key}, $identity_iv);
+    my $expires = $args{token_expiry} ? $args{token_expiry} : UID2::Client::Timestamp->now->add_seconds(60 * 60);
+    my $master_payload = pack 'q> a*', $expires->get_epoch_milli, _encrypt_cbc($identity, $args{site_key}, $identity_iv);
     my $master_iv = random_bytes(16);
 
     my $version = 2;
@@ -37,11 +38,11 @@ sub encrypt_token_v3 {
 
     # user identity data
     my $privacy_bits = irand();
-    my $established_ms = int((gettimeofday() - (60 * 60)) * 1000);
-    my $refreshed_ms = int((gettimeofday() - (40 * 60)) * 1000);
+    my $established = UID2::Client::Timestamp->now->add_seconds(-60 * 60);
+    my $refreshed = UID2::Client::Timestamp->now->add_seconds(-40 * 60);
     my $identity_bytes = decode_b64($args{id_str});
 
-    $site_payload .= pack 'N! q> q> a*', $privacy_bits, $established_ms, $refreshed_ms, $identity_bytes;
+    $site_payload .= pack 'N! q> q> a*', $privacy_bits, $established->get_epoch_milli, $refreshed->get_epoch_milli, $identity_bytes;
     my $site_iv = random_bytes(12);
     my $site_payload_encrypted = _encrypt_gcm($site_payload, $args{site_key}, $site_iv);
 
@@ -51,10 +52,9 @@ sub encrypt_token_v3 {
     my $operator_version = 0;
     my $operator_key_id = 0;
 
-    my $expires_ms = $args{token_expiry} ? $args{token_expiry}->get_epoch_milli
-            : int((gettimeofday() + (60 * 60)) * 1000);
-    my $created_ms = int(gettimeofday() * 1000);
-    my $master_payload = pack 'q> q> N! C N! N! a*', $expires_ms, $created_ms,
+    my $expires = $args{token_expiry} ? $args{token_expiry} : UID2::Client::Timestamp->now->add_seconds(60 * 60);
+    my $created = UID2::Client::Timestamp->now;
+    my $master_payload = pack 'q> q> N! C N! N! a*', $expires->get_epoch_milli, $created->get_epoch_milli,
             $operator_site_id, $operator_type, $operator_version, $operator_key_id,
             $site_payload_encrypted;
     my $master_iv = random_bytes(12);
@@ -71,13 +71,13 @@ sub encrypt_data_v2 {
     my $iv = random_bytes(16);
     my $payload_type = 128;
     my $version = 1;
-    my $now = $args->{now} ? $args->{now}->get_epoch_milli : int(gettimeofday() * 1000);
+    my $now = $args->{now} // UID2::Client::Timestamp->now;
     my $payload = pack 'C C q> N! a*',
-            $payload_type, $version, $now,
+            $payload_type, $version, $now->get_epoch_milli,
             $args->{site_id}, _encrypt_cbc($data, $args->{key}, $iv);
     +{
         is_success => 1,
-        status => UID2::Client::ENCRYPTION_STATUS_SUCCESS,
+        status => UID2::Client::EncryptionStatus::SUCCESS,
         encrypted_data => encode_b64($payload),
     };
 }

@@ -2,7 +2,9 @@ use strict;
 use warnings;
 
 use Test::More;
+
 use UID2::Client;
+use UID2::Client::Timestamp;
 
 my $now = UID2::Client::Timestamp->now();
 isa_ok $now, 'UID2::Client::Timestamp';
