@@ -3,7 +3,7 @@ use warnings;
 
 use Test::More;
 
-use UID2::Client;
+use UID2::Client::XS;
 
 my $endpoint   = $ENV{UID2_ENDPOINT};
 my $auth_key   = $ENV{UID2_AUTH_KEY};
@@ -14,7 +14,7 @@ unless ($endpoint && $auth_key && $secret_key && $uid2_token) {
     plan skip_all => '$ENV{UID2_ENDPOINT} and $ENV{UID2_AUTH_KEY} and $ENV{UID2_SECRET_KEY} and $ENV{UID2_TOKEN} are not set';
 }
 
-my $client = UID2::Client->new({
+my $client = UID2::Client::XS->new({
     endpoint => $endpoint,
     auth_key => $auth_key,
     secret_key => $secret_key,

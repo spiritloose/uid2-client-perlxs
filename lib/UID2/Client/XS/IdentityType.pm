@@ -1,11 +1,11 @@
-package UID2::Client::IdentityScope;
+package UID2::Client::XS::IdentityType;
 use strict;
 use warnings;
 use Exporter 'import';
 
 our @EXPORT_OK = qw(
-    UID2
-    EUID
+    EMAIL
+    PHONE
 );
 
 1;
@@ -15,29 +15,29 @@ __END__
 
 =head1 NAME
 
-UID2::Client::IdentityScope - Identity Scope Constants for UID2::Client
+UID2::Client::XS::IdentityType - Identity Type Constants for UID2::Client::XS
 
 =head1 SYNOPSIS
 
-  use UID2::Client::IdentityScope;
+  use UID2::Client::XS::IdentityType;
 
 =head1 DESCRIPTION
 
-This module defines constants for L<UID2::Client>.
+This module defines constants for L<UID2::Client::XS>.
 
 =head1 CONSTANTS
 
 =over
 
-=item UID2
+=item EMAIL
 
-=item EUID
+=item PHONE
 
 =back
 
 =head1 SEE ALSO
 
-L<UID2::Client>
+L<UID2::Client::XS>
 
 =head1 LICENSE
 

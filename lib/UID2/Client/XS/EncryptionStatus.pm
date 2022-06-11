@@ -1,4 +1,4 @@
-package UID2::Client::DecryptionStatus;
+package UID2::Client::XS::EncryptionStatus;
 use strict;
 use warnings;
 use Exporter 'import';
@@ -7,12 +7,10 @@ our @EXPORT_OK = qw(
     SUCCESS
     NOT_AUTHORIZED_FOR_KEY
     NOT_INITIALIZED
-    INVALID_PAYLOAD
-    EXPIRED_TOKEN
     KEYS_NOT_SYNCED
-    VERSION_NOT_SUPPORTED
-    INVALID_PAYLOAD_TYPE
-    INVALID_IDENTITY_SCOPE
+    TOKEN_DECRYPT_FAILURE
+    KEY_INACTIVE
+    ENCRYPTION_FAILURE
 );
 
 1;
@@ -22,15 +20,15 @@ __END__
 
 =head1 NAME
 
-UID2::Client::DecryptionStatus - Decryption Status Constants for UID2::Client
+UID2::Client::XS::EncryptionStatus - Encryption Status Constants for UID2::Client::XS
 
 =head1 SYNOPSIS
 
-  use UID2::Client::DecryptionStatus;
+  use UID2::Client::XS::EncryptionStatus;
 
 =head1 DESCRIPTION
 
-This module defines constants for L<UID2::Client>.
+This module defines constants for L<UID2::Client::XS>.
 
 =head1 CONSTANTS
 
@@ -42,23 +40,19 @@ This module defines constants for L<UID2::Client>.
 
 =item NOT_INITIALIZED
 
-=item INVALID_PAYLOAD
-
-=item EXPIRED_TOKEN
-
 =item KEYS_NOT_SYNCED
 
-=item VERSION_NOT_SUPPORTED
+=item TOKEN_DECRYPT_FAILURE
 
-=item INVALID_PAYLOAD_TYPE
+=item KEY_INACTIVE
 
-=item INVALID_IDENTITY_SCOPE
+=item ENCRYPTION_FAILURE
 
 =back
 
 =head1 SEE ALSO
 
-L<UID2::Client>
+L<UID2::Client::XS>
 
 =head1 LICENSE
 

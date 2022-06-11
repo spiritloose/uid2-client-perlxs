@@ -4,12 +4,12 @@ use warnings;
 use Test::More;
 
 BEGIN {
-    use_ok('UID2::Client');
-    use_ok('UID2::Client::DecryptionStatus');
-    use_ok('UID2::Client::EncryptionStatus');
-    use_ok('UID2::Client::IdentityScope');
-    use_ok('UID2::Client::IdentityType');
-    use_ok('UID2::Client::Timestamp');
+    use_ok('UID2::Client::XS');
+    use_ok('UID2::Client::XS::DecryptionStatus');
+    use_ok('UID2::Client::XS::EncryptionStatus');
+    use_ok('UID2::Client::XS::IdentityScope');
+    use_ok('UID2::Client::XS::IdentityType');
+    use_ok('UID2::Client::XS::Timestamp');
 };
 
 done_testing;

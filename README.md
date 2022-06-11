@@ -1,13 +1,13 @@
-[![Actions Status](https://github.com/spiritloose/uid2-client-perl/workflows/test/badge.svg)](https://github.com/spiritloose/uid2-client-perl/actions) [![MetaCPAN Release](https://badge.fury.io/pl/UID2-Client.svg)](https://metacpan.org/release/UID2-Client)
+[![Actions Status](https://github.com/spiritloose/uid2-client-perlxs/workflows/test/badge.svg)](https://github.com/spiritloose/uid2-client-perlxs/actions) [![MetaCPAN Release](https://badge.fury.io/pl/UID2-Client-XS.svg)](https://metacpan.org/release/UID2-Client-XS)
 # NAME
 
-UID2::Client - Unified ID 2.0 Client for Perl (binding to the UID2 C++ library)
+UID2::Client::XS - Unified ID 2.0 Client for Perl (binding to the UID2 C++ library)
 
 # SYNOPSIS
 
-    use UID2::Client;
+    use UID2::Client::XS;
 
-    my $client = UID2::Client->new({
+    my $client = UID2::Client::XS->new({
         endpoint => '...',
         auth_key => '...',
         secret_key => '...',
@@ -27,7 +27,7 @@ This module provides an interface to Unified ID 2.0 API.
 
 ## new
 
-    my $client = UID2::Client->new(\%options);
+    my $client = UID2::Client::XS->new(\%options);
 
 Creates and returns a new UID2 client with a hashref of options.
 
@@ -53,7 +53,7 @@ Valid options are:
 
 ## new\_euid
 
-    my $client = UID2::Client->new_euid(\%options);
+    my $client = UID2::Client::XS->new_euid(\%options);
 
 Calls _new()_ with EUID identity\_scope.
 
@@ -95,7 +95,7 @@ Decrypts an advertising token and returns a hashref containing the response. The
 
     Returns failed status if is\_success is false.
 
-    See [UID2::Client::DecryptionStatus](https://metacpan.org/pod/UID2%3A%3AClient%3A%3ADecryptionStatus) for more details.
+    See [UID2::Client::XS::DecryptionStatus](https://metacpan.org/pod/UID2%3A%3AClient%3A%3AXS%3A%3ADecryptionStatus) for more details.
 
 - uid
 
@@ -133,7 +133,7 @@ Returns a hashref containing the response. The hashref will have the following k
 
     Returns failed status if is\_success is false.
 
-    See [UID2::Client::EncryptionStatus](https://metacpan.org/pod/UID2%3A%3AClient%3A%3AEncryptionStatus) for more details.
+    See [UID2::Client::XS::EncryptionStatus](https://metacpan.org/pod/UID2%3A%3AClient%3A%3AXS%3A%3AEncryptionStatus) for more details.
 
 - encrypted\_data
 

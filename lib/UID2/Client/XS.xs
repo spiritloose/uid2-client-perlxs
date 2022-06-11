@@ -45,23 +45,23 @@ static SV*
 make_timestamp(pTHX_ uid2::Timestamp t)
 {
     SV* res = newSV(0);
-    sv_setref_pv(res, "UID2::Client::Timestamp", (void *) new uid2::Timestamp(t));
+    sv_setref_pv(res, "UID2::Client::XS::Timestamp", (void *) new uid2::Timestamp(t));
     return res;
 }
 
-MODULE = UID2::Client PACKAGE = UID2::Client
+MODULE = UID2::Client::XS PACKAGE = UID2::Client::XS
 
 BOOT:
 {
-    HV* stash = gv_stashpv("UID2::Client::IdentityScope", 1);
+    HV* stash = gv_stashpv("UID2::Client::XS::IdentityScope", 1);
     newCONSTSUB(stash, "UID2", newSViv(static_cast<int>(uid2::IdentityScope::UID2)));
     newCONSTSUB(stash, "EUID", newSViv(static_cast<int>(uid2::IdentityScope::EUID)));
 
-    stash = gv_stashpv("UID2::Client::IdentityType", 1);
+    stash = gv_stashpv("UID2::Client::XS::IdentityType", 1);
     newCONSTSUB(stash, "EMAIL", newSViv(static_cast<int>(uid2::IdentityType::Email)));
     newCONSTSUB(stash, "PHONE", newSViv(static_cast<int>(uid2::IdentityType::Phone)));
 
-    stash = gv_stashpv("UID2::Client::DecryptionStatus", 1);
+    stash = gv_stashpv("UID2::Client::XS::DecryptionStatus", 1);
     newCONSTSUB(stash, "SUCCESS", newSViv(static_cast<int>(uid2::DecryptionStatus::SUCCESS)));
     newCONSTSUB(stash, "NOT_AUTHORIZED_FOR_KEY", newSViv(static_cast<int>(uid2::DecryptionStatus::NOT_AUTHORIZED_FOR_KEY)));
     newCONSTSUB(stash, "NOT_INITIALIZED", newSViv(static_cast<int>(uid2::DecryptionStatus::NOT_INITIALIZED)));
@@ -72,7 +72,7 @@ BOOT:
     newCONSTSUB(stash, "INVALID_PAYLOAD_TYPE", newSViv(static_cast<int>(uid2::DecryptionStatus::INVALID_PAYLOAD_TYPE)));
     newCONSTSUB(stash, "INVALID_IDENTITY_SCOPE", newSViv(static_cast<int>(uid2::DecryptionStatus::INVALID_IDENTITY_SCOPE)));
 
-    stash = gv_stashpv("UID2::Client::EncryptionStatus", 1);
+    stash = gv_stashpv("UID2::Client::XS::EncryptionStatus", 1);
     newCONSTSUB(stash, "SUCCESS", newSViv(static_cast<int>(uid2::EncryptionStatus::SUCCESS)));
     newCONSTSUB(stash, "NOT_AUTHORIZED_FOR_KEY", newSViv(static_cast<int>(uid2::EncryptionStatus::NOT_AUTHORIZED_FOR_KEY)));
     newCONSTSUB(stash, "NOT_INITIALIZED", newSViv(static_cast<int>(uid2::EncryptionStatus::NOT_INITIALIZED)));
@@ -293,19 +293,19 @@ uid2::UID2Client::DESTROY()
 CODE:
     delete THIS;
 
-MODULE = UID2::Client PACKAGE = UID2::Client::Timestamp
+MODULE = UID2::Client::XS PACKAGE = UID2::Client::XS::Timestamp
 
 PROTOTYPES: DISABLE
 
 static uid2::Timestamp*
-UID2::Client::Timestamp::now()
+UID2::Client::XS::Timestamp::now()
 CODE:
     RETVAL = new uid2::Timestamp(uid2::Timestamp::Now());
 OUTPUT:
     RETVAL
 
 static uid2::Timestamp*
-UID2::Client::Timestamp::from_epoch_second(epoch_second)
+UID2::Client::XS::Timestamp::from_epoch_second(epoch_second)
     int64_t epoch_second;
 CODE:
     RETVAL = new uid2::Timestamp(uid2::Timestamp::FromEpochSecond(epoch_second));
@@ -313,7 +313,7 @@ OUTPUT:
     RETVAL
 
 static uid2::Timestamp*
-UID2::Client::Timestamp::from_epoch_milli(epoch_milli)
+UID2::Client::XS::Timestamp::from_epoch_milli(epoch_milli)
     int64_t epoch_milli;
 CODE:
     RETVAL = new uid2::Timestamp(uid2::Timestamp::FromEpochMilli(epoch_milli));
@@ -345,7 +345,7 @@ uid2::Timestamp*
 uid2::Timestamp::add_seconds(seconds)
     int seconds;
 PREINIT:
-    const char* CLASS = "UID2::Client::Timestamp";
+    const char* CLASS = "UID2::Client::XS::Timestamp";
 CODE:
     RETVAL = new uid2::Timestamp(THIS->AddSeconds(seconds));
 OUTPUT:
@@ -355,7 +355,7 @@ uid2::Timestamp*
 uid2::Timestamp::add_days(days)
     int days;
 PREINIT:
-    const char* CLASS = "UID2::Client::Timestamp";
+    const char* CLASS = "UID2::Client::XS::Timestamp";
 CODE:
     RETVAL = new uid2::Timestamp(THIS->AddDays(days));
 OUTPUT:

@@ -1,4 +1,4 @@
-name = "UID2-Client"
+name = "UID2-Client-XS"
 license = "bsd"
 module_maker = "ModuleBuild"
 badges = ['github-actions/test', 'metacpan']

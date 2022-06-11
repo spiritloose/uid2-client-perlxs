@@ -1,4 +1,4 @@
-package UID2::Client;
+package UID2::Client::XS;
 use 5.008005;
 use strict;
 use warnings;
@@ -7,13 +7,13 @@ use Exporter 'import';
 our $VERSION = "0.01";
 
 require XSLoader;
-XSLoader::load('UID2::Client', $VERSION);
+XSLoader::load('UID2::Client::XS', $VERSION);
 
-require UID2::Client::DecryptionStatus;
-require UID2::Client::EncryptionStatus;
-require UID2::Client::IdentityScope;
-require UID2::Client::IdentityType;
-require UID2::Client::Timestamp;
+require UID2::Client::XS::DecryptionStatus;
+require UID2::Client::XS::EncryptionStatus;
+require UID2::Client::XS::IdentityScope;
+require UID2::Client::XS::IdentityType;
+require UID2::Client::XS::Timestamp;
 
 1;
 __END__
@@ -22,13 +22,13 @@ __END__
 
 =head1 NAME
 
-UID2::Client - Unified ID 2.0 Client for Perl (binding to the UID2 C++ library)
+UID2::Client::XS - Unified ID 2.0 Client for Perl (binding to the UID2 C++ library)
 
 =head1 SYNOPSIS
 
-  use UID2::Client;
+  use UID2::Client::XS;
 
-  my $client = UID2::Client->new({
+  my $client = UID2::Client::XS->new({
       endpoint => '...',
       auth_key => '...',
       secret_key => '...',
@@ -48,7 +48,7 @@ This module provides an interface to Unified ID 2.0 API.
 
 =head2 new
 
-  my $client = UID2::Client->new(\%options);
+  my $client = UID2::Client::XS->new(\%options);
 
 Creates and returns a new UID2 client with a hashref of options.
 
@@ -78,7 +78,7 @@ UID2 or EUID. Defaults to UID2.
 
 =head2 new_euid
 
-  my $client = UID2::Client->new_euid(\%options);
+  my $client = UID2::Client::XS->new_euid(\%options);
 
 Calls I<new()> with EUID identity_scope.
 
@@ -126,7 +126,7 @@ Boolean indicating whether the operation succeeded.
 
 Returns failed status if is_success is false.
 
-See L<UID2::Client::DecryptionStatus> for more details.
+See L<UID2::Client::XS::DecryptionStatus> for more details.
 
 =item uid
 
@@ -176,7 +176,7 @@ Boolean indicating whether the operation succeeded.
 
 Returns failed status if is_success is false.
 
-See L<UID2::Client::EncryptionStatus> for more details.
+See L<UID2::Client::XS::EncryptionStatus> for more details.
 
 =item encrypted_data
 

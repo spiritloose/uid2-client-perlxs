@@ -3,7 +3,7 @@ use warnings;
 use lib '.';
 
 use Test::More;
-use UID2::Client;
+use UID2::Client::XS;
 
 use t::TestUtils;
 
@@ -26,7 +26,7 @@ my $site_secret = pack('C32',
     48, 164, 11, 65, 226, 110, 167, 14,
     108, 51, 254, 125, 65, 24, 23, 133,
 );
-my $now = UID2::Client::Timestamp->now();
+my $now = UID2::Client::XS::Timestamp->now();
 my $master_key = {
     id        => $master_key_id,
     site_id   => -1,
@@ -47,18 +47,18 @@ my $example_uid = 'ywsvDNINiZOVSsfkHpLpSJzXzhr6Jx9Z/4Q0+lsEUvM=';
 my $client_secret = 'ioG3wKxAokmp+rERx6A4kM/13qhyolUXIu14WN16Spo=';
 
 no_leaks_ok(sub {
-    my $client = UID2::Client->new({
+    my $client = UID2::Client::XS->new({
         endpoint => 'ep',
         auth_key => 'ak',
         secret_key => $client_secret,
-        identity_scope => UID2::Client::IdentityScope::UID2,
+        identity_scope => UID2::Client::XS::IdentityScope::UID2,
     });
     $client->refresh_json(t::TestUtils::key_set_to_json($master_key, $site_key));
     my $advertising_token = t::TestUtils::encrypt_token_v3(
         id_str => $example_uid,
         site_id => $site_id,
-        identity_type => UID2::Client::IdentityType::EMAIL,
-        identity_scope => UID2::Client::IdentityScope::UID2,
+        identity_type => UID2::Client::XS::IdentityType::EMAIL,
+        identity_scope => UID2::Client::XS::IdentityScope::UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $site_key_id, secret => $site_key->{secret} },
     );

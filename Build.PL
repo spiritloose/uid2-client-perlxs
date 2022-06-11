@@ -43,8 +43,8 @@ my %args = (
         'Test::More' => '0.98',
     },
 
-    name            => 'UID2-Client',
-    module_name     => 'UID2::Client',
+    name            => 'UID2-Client-XS',
+    module_name     => 'UID2::Client::XS',
     allow_pureperl => 0,
 
     script_files => [glob('script/*'), glob('bin/*')],
