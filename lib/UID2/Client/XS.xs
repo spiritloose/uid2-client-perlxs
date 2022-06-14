@@ -202,7 +202,7 @@ CODE:
     hv_stores(res, "uid", newSVpvn(uid.c_str(), uid.size()));
     hv_stores(res, "site_id", newSViv(result.GetSiteId()));
     hv_stores(res, "site_key_site_id", newSViv(result.GetSiteKeySiteId()));
-    hv_stores(res, "established", make_timestamp(result.GetEstablished()));
+    hv_stores(res, "established", make_timestamp(aTHX_ result.GetEstablished()));
     RETVAL = newRV_noinc((SV *) res);
 OUTPUT:
     RETVAL
@@ -282,7 +282,7 @@ CODE:
         const std::vector<std::uint8_t> data = result.GetDecryptedData();
         const std::string str(data.begin(), data.end());
         hv_stores(res, "decrypted_data", newSVpvn(str.c_str(), str.size()));
-        hv_stores(res, "encrypted_at", make_timestamp(result.GetEncryptedAt()));
+        hv_stores(res, "encrypted_at", make_timestamp(aTHX_ result.GetEncryptedAt()));
     }
     RETVAL = newRV_noinc((SV *) res);
 OUTPUT:
