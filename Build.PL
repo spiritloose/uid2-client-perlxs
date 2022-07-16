@@ -38,7 +38,7 @@ my %args = (
     },
 
     test_requires => {
-        'CryptX' => '0',
+        'CryptX' => '0.060',
         'JSON::PP' => '0',
         'Test::More' => '0.98',
     },

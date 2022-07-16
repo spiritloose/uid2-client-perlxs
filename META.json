@@ -55,7 +55,7 @@
       },
       "test" : {
          "requires" : {
-            "CryptX" : "0",
+            "CryptX" : "0.060",
             "JSON::PP" : "0",
             "Test::More" : "0.98"
          }
@@ -74,6 +74,6 @@
       }
    },
    "version" : "0.01",
-   "x_serialization_backend" : "JSON::PP version 4.09",
+   "x_serialization_backend" : "JSON::PP version 4.10",
    "x_static_install" : 0
 }
