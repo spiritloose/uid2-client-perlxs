@@ -66,9 +66,7 @@ sub ACTION_build {
     }
     system <<"END_CMD" and die $!;
 cd $UID2_DIR \\
-&& perl -i -pe 's/^add_subdirectory\\(app\\)//' CMakeLists.txt \\
-&& perl -i -pe 's/^enable_testing\\(\\)//' CMakeLists.txt \\
-&& perl -i -pe 's/^add_subdirectory\\(test\\)//' CMakeLists.txt \\
+&& (patch --batch --quiet --forward -p1 < ../uid2-client-cpp11.patch || true) \\
 && mkdir -p build \\
 && cd build \\
 && $cmake .. \\
