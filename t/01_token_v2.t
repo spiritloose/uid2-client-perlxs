@@ -60,7 +60,7 @@ subtest SmokeTest => sub {
     my $json = t::TestUtils::key_set_to_json($master_key, $site_key);
     my $refresh_result = $client->refresh_json($json);
     ok $refresh_result->{is_success};
-    my $advertising_token = t::TestUtils::encrypt_token_v2(
+    my $advertising_token = t::TestUtils::generate_token_v2(
         id_str => $example_uid,
         site_id => $site_id,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
@@ -74,7 +74,7 @@ subtest SmokeTest => sub {
 
 subtest EmptyKeyContainer => sub {
     my $client = UID2::Client::XS->new($client_options);
-    my $advertising_token = t::TestUtils::encrypt_token_v2(
+    my $advertising_token = t::TestUtils::generate_token_v2(
         id_str => $example_uid,
         site_id => $site_id,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
@@ -87,7 +87,7 @@ subtest EmptyKeyContainer => sub {
 
 subtest NotAuthorizedForKey => sub {
     my $client = UID2::Client::XS->new($client_options);
-    my $advertising_token = t::TestUtils::encrypt_token_v2(
+    my $advertising_token = t::TestUtils::generate_token_v2(
         id_str => $example_uid,
         site_id => $site_id,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
@@ -117,7 +117,7 @@ subtest NotAuthorizedForKey => sub {
 
 subtest InvalidPayload => sub {
     my $client = UID2::Client::XS->new($client_options);
-    my $advertising_token = t::TestUtils::encrypt_token_v2(
+    my $advertising_token = t::TestUtils::generate_token_v2(
         id_str => $example_uid,
         site_id => $site_id,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
@@ -136,7 +136,7 @@ subtest TokenExpiryAndCustomNow => sub {
     my $expiry = $now->add_days(-6);
     my $client = UID2::Client::XS->new($client_options);
     $client->refresh_json(t::TestUtils::key_set_to_json($master_key, $site_key));
-    my $advertising_token = t::TestUtils::encrypt_token_v2(
+    my $advertising_token = t::TestUtils::generate_token_v2(
         id_str => $example_uid,
         site_id => $site_id,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
