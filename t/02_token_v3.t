@@ -62,10 +62,9 @@ subtest SmokeTest => sub {
     my $json = t::TestUtils::key_set_to_json($master_key, $site_key);
     my $refresh_result = $client->refresh_json($json);
     ok $refresh_result->{is_success};
-    my $advertising_token = t::TestUtils::encrypt_token_v3(
+    my $advertising_token = t::TestUtils::generate_token_v3(
         id_str => $example_uid,
         site_id => $site_id,
-        identity_type => UID2::Client::XS::IdentityType::EMAIL,
         identity_scope => UID2::Client::XS::IdentityScope::UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $site_key_id, secret => $site_key->{secret} },
@@ -78,10 +77,9 @@ subtest SmokeTest => sub {
 
 subtest EmptyKeyContainer => sub {
     my $client = UID2::Client::XS->new($client_options);
-    my $advertising_token = t::TestUtils::encrypt_token_v3(
+    my $advertising_token = t::TestUtils::generate_token_v3(
         id_str => $example_uid,
         site_id => $site_id,
-        identity_type => UID2::Client::XS::IdentityType::EMAIL,
         identity_scope => UID2::Client::XS::IdentityScope::UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $site_key_id, secret => $site_key->{secret} },
@@ -93,10 +91,9 @@ subtest EmptyKeyContainer => sub {
 
 subtest NotAuthorizedForKey => sub {
     my $client = UID2::Client::XS->new($client_options);
-    my $advertising_token = t::TestUtils::encrypt_token_v3(
+    my $advertising_token = t::TestUtils::generate_token_v3(
         id_str => $example_uid,
         site_id => $site_id,
-        identity_type => UID2::Client::XS::IdentityType::EMAIL,
         identity_scope => UID2::Client::XS::IdentityScope::UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $site_key_id, secret => $site_key->{secret} },
@@ -125,10 +122,9 @@ subtest NotAuthorizedForKey => sub {
 
 subtest InvalidPayload => sub {
     my $client = UID2::Client::XS->new($client_options);
-    my $advertising_token = t::TestUtils::encrypt_token_v3(
+    my $advertising_token = t::TestUtils::generate_token_v3(
         id_str => $example_uid,
         site_id => $site_id,
-        identity_type => UID2::Client::XS::IdentityType::EMAIL,
         identity_scope => UID2::Client::XS::IdentityScope::UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $site_key_id, secret => $site_key->{secret} },
@@ -146,10 +142,9 @@ subtest TokenExpiryAndCustomNow => sub {
     my $expiry = $now->add_days(-6);
     my $client = UID2::Client::XS->new($client_options);
     $client->refresh_json(t::TestUtils::key_set_to_json($master_key, $site_key));
-    my $advertising_token = t::TestUtils::encrypt_token_v3(
+    my $advertising_token = t::TestUtils::generate_token_v3(
         id_str => $example_uid,
         site_id => $site_id,
-        identity_type => UID2::Client::XS::IdentityType::EMAIL,
         identity_scope => UID2::Client::XS::IdentityScope::UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $site_key_id, secret => $site_key->{secret} },
@@ -181,10 +176,9 @@ subtest SiteIdFromToken => sub {
     my $data = pack('C*', 1, 2, 3, 4, 5, 6);
     my $client = UID2::Client::XS->new($client_options);
     $client->refresh_json(t::TestUtils::key_set_to_json($master_key, $site_key));
-    my $advertising_token = t::TestUtils::encrypt_token_v3(
+    my $advertising_token = t::TestUtils::generate_token_v3(
         id_str => $example_uid,
         site_id => $site_id,
-        identity_type => UID2::Client::XS::IdentityType::EMAIL,
         identity_scope => UID2::Client::XS::IdentityScope::UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $site_key_id, secret => $site_key->{secret} },
@@ -203,10 +197,9 @@ subtest SiteIdFromTokenCustomSiteKeySiteId => sub {
     my $data = pack('C*', 1, 2, 3, 4, 5, 6);
     my $client = UID2::Client::XS->new($client_options);
     $client->refresh_json(t::TestUtils::key_set_to_json($master_key, $site_key));
-    my $advertising_token = t::TestUtils::encrypt_token_v3(
+    my $advertising_token = t::TestUtils::generate_token_v3(
         id_str => $example_uid,
         site_id => $site_id2,
-        identity_type => UID2::Client::XS::IdentityType::EMAIL,
         identity_scope => UID2::Client::XS::IdentityScope::UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $site_key_id, secret => $site_key->{secret} },
@@ -225,10 +218,9 @@ subtest SiteIdAndTokenSet => sub {
     my $data = pack('C*', 1, 2, 3, 4, 5, 6);
     my $client = UID2::Client::XS->new($client_options);
     $client->refresh_json(t::TestUtils::key_set_to_json($master_key, $site_key));
-    my $advertising_token = t::TestUtils::encrypt_token_v3(
+    my $advertising_token = t::TestUtils::generate_token_v3(
         id_str => $example_uid,
         site_id => $site_id,
-        identity_type => UID2::Client::XS::IdentityType::EMAIL,
         identity_scope => UID2::Client::XS::IdentityScope::UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $site_key_id, secret => $site_key->{secret} },
@@ -301,10 +293,9 @@ subtest TokenDecryptKeyExpired => sub {
         secret    => $site_secret,
     };
     $client->refresh_json(t::TestUtils::key_set_to_json($master_key, $key));
-    my $advertising_token = t::TestUtils::encrypt_token_v3(
+    my $advertising_token = t::TestUtils::generate_token_v3(
         id_str => $example_uid,
         site_id => $site_id,
-        identity_type => UID2::Client::XS::IdentityType::EMAIL,
         identity_scope => UID2::Client::XS::IdentityScope::UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $key->{id}, secret => $key->{secret} },
@@ -361,10 +352,9 @@ subtest TokenExpired => sub {
     my $data = pack('C*', 1, 2, 3, 4, 5, 6);
     my $client = UID2::Client::XS->new($client_options);
     $client->refresh_json(t::TestUtils::key_set_to_json($master_key, $site_key));
-    my $advertising_token = t::TestUtils::encrypt_token_v3(
+    my $advertising_token = t::TestUtils::generate_token_v3(
         id_str => $example_uid,
         site_id => $site_id,
-        identity_type => UID2::Client::XS::IdentityType::EMAIL,
         identity_scope => UID2::Client::XS::IdentityScope::UID2,
         master_key => { id => $master_key_id, secret => $master_key->{secret} },
         site_key => { id => $site_key_id, secret => $site_key->{secret} },

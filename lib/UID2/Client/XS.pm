@@ -13,6 +13,7 @@ require UID2::Client::XS::DecryptionStatus;
 require UID2::Client::XS::EncryptionStatus;
 require UID2::Client::XS::IdentityScope;
 require UID2::Client::XS::IdentityType;
+require UID2::Client::XS::AdvertisingTokenVersion;
 require UID2::Client::XS::Timestamp;
 
 1;
